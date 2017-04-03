@@ -83,7 +83,7 @@ class Repository:
             print("File", students_file, "cannot be read, not a .txt file" )
         else:
             for line in fp:
-                CWID, name, major = line.strip.split("\t")
+                CWID, name, major = line.strip().split("\t")
                 self.students[CWID]=Student(CWID, name, major)
             
     def read_instructors(self, instructors_file):
@@ -93,7 +93,7 @@ class Repository:
             print("File", instructors_file, "cannot be read, not a .txt file" )
         else:
             for line in fp: 
-                CWID, name, dept = line.strip.split("\t")
+                CWID, name, dept = line.strip().split("\t")
                 self.instructors[CWID]=Instructor(CWID, name, dept) 
 
     def read_grades(self, grades_file): 
@@ -103,20 +103,17 @@ class Repository:
             print("File", grades_file, "cannot be read, not a .txt file" )
         else:
             for line in fp:
-                student_CWID, course, grade, instructor_CWID = line.strip.split("\t")
+                student_CWID, course, grade, instructor_CWID = line.strip().split("\t")
                 self.grades.append(Grade(student_CWID, course, grade, instructor_CWID))
                 
     def assign_course(self):
-        student = ""
-        instructor = ""
-        if student:
-            for grade in Student.courses_taken: # loop through all grades using Student collaborator
-                st_new_course = grade.Student.st_add_course
-                print("Student, add new course", st_new_course)
-        elif instructor:
-            for grade in Instructor.courses_taught: 
-                in_new_course = grade.Intructor.in_new_course # assign course using Instructor collaborator
-                print("Instructor", in_new_course)
+        for grade in self.grades: # loop through all grades using Student collaborator
+                st_new_course = Student.st_add_course
+                in_new_course = Instructor.in_add_course # assign course using Instructor collaborator
+                if Grade.CWID_st in self.students: 
+                    print("Student, add new course", st_new_course)
+                elif Grade.CWID_in in self.instructors:
+                    print("Instructor", in_new_course)
     
     def student_summary(self):
         """ Create a table summarizing all the info about students from students.txt and grades.txt """
@@ -179,52 +176,33 @@ class Grade:
     
 
 def main():  
-    try:  
-        students = Repository.read_students("C:\Python27\students.txt")
-    except FileNotFoundError:
-        print("Invalid directory")
-    try:
-        instructors = Repository.read_instructors("C:\Python27\instructors.txt")
-    except FileNotFoundError:
-        print("Invalid directory")
-    try:
-        grades = Repository.read_grades("C:\Python27\grades.txt")
-    except FileNotFoundError:
-        print("Invalid directory")
-        
-    while True:
-        students.st_add_course('A', 'B', 'C', 'D')
-        students.courses_completed()
-        instructors.in_add_course('SSW 567', 'SSW 564', 'SSW 687', 'SSW 555', 'SSW 689', 'SSW 800', 'SSW 750', 'SSW 611', 'SSW 645')
-        instructors.courses_taught()
-        grades()
-        break
+    sitdata_rep = Repository()
+    sitdata_rep.read_students("C:\Python27\students.txt")
+    sitdata_rep.read_instructors("C:\Python27\instructors.txt")
+    sitdata_rep.read_grades("C:\Python27\grades.txt")
+    sitdata_rep.assign_course()
         
   
-class StudentPrettyTableTest(unittest.TestCase):
-    """Test Pretty Table"""
-    def test_summary(self):
+class StevensDataRepositoryTest(unittest.TestCase):
+    def st_test_summary(self):
         """ Test Student summary table """
-        CWID, name, courses_taken = Repository.student_summary
+        sitdata_rep = Repository()
+        CWID, name, courses_taken = sitdata_rep.student_summary
         self.assertEqual(CWID, 10103)
         self.assertEqual(name, 'Baldwin, C')
         self.assertEqual(courses_taken, ['SSW 567', 'SSW 564', 'SSW 687'])  
 
-        
-class InstructorPrettyTableTest(unittest.TestCase):
-    """ Test Pretty Table """
-    def test_summary(self):
+    def in_test_summary(self):
         """ Test Instructor summary table """
-        CWID, name, dept, course, students = Repository.instructor_summary
+        sitdata_rep = Repository()
+        CWID, name, dept, course, students = sitdata_rep.instructor_summary
         self.assertEqual(CWID, 98764)
         self.assertEqual(name, 'Feynman, R')
-        self.assrtEqual(dept, 'SFEN')
+        self.assertEqual(dept, 'SFEN')
         self.assertEqual(course, 'SSW 687')
         self.assertEqual(students, 3)
         
-# class StudentsInCourseTest(unittest.TestCase):
-        
 
-    if __name__ == '__main__':
-        unittest.main(exit=False, verbosity=3)
-        main()
+if __name__ == '__main__':
+    unittest.main(exit=False, verbosity=3)
+    main()

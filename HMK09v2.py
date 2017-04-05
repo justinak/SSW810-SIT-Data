@@ -65,8 +65,8 @@ Homework 9:
 """
 
 import unittest
-from prettytable import PrettyTable
 from collections import defaultdict
+from prettytable import PrettyTable
 
 
 class Repository:
@@ -107,24 +107,26 @@ class Repository:
                 self.grades.append(Grade(student_CWID, course, grade, instructor_CWID))
                 
     def assign_course(self):
+        """ Tell student to take another course, tell instructor about the student """
         for grade in self.grades: # loop through all grades using Student collaborator
-                st_new_course = Student.st_add_course
-                in_new_course = Instructor.in_add_course # assign course using Instructor collaborator
-                if Grade.CWID_st in self.students: 
-                    print("Student, add new course", st_new_course)
-                elif Grade.CWID_in in self.instructors:
-                    print("Instructor", in_new_course)
+            s = self.students[grade.CWID_st] # finds instance of class Student for this grade to look up by CWID
+            i = self.instructors[grade.CWID_in] # finds instance of class Instructor for this grade to look up by CWID
+            s.st_add_course(grade) # updates dict in s that tracks the class Student for this grade
+            i.in_add_course(grade)    
     
     def student_summary(self):
         """ Create a table summarizing all the info about students from students.txt and grades.txt """
         student_table = PrettyTable(['CWID', 'Name', 'Completed Courses'])
-        student_table.add_row([Student.CWID, Student.name, Student.coures_taken])
+        for student in self.students.values():
+            student_table.add_row([student.CWID, student.name, sorted(student.courses_taken.keys())])
         print(student_table)
         
     def instructor_summary(self):
         """ Create a table summarizing all the info about instructors from instructors.txt and grades.txt """
         instructor_table = PrettyTable(['CWID', 'Name', 'Dept', 'Course', 'Students'])
-        instructor_table = PrettyTable([Instructor.CWID, Instructor.name, Instructor.dept, Grade.course, Instructor.courses_taught])
+        for instructor in self.instructor.values():
+            for course in instructor.courses_taught:
+                instructor_table.add_row([instructor.CWID, instructor.name, instructor.dept, course, instructor.courses_taught[course]])
         print(instructor_table)
         
         
@@ -147,7 +149,6 @@ class Student:
             grades +=1 # count how many grades the course has
             add_course = self.courses_taken.append[course][grades] # add the course and how many grades were counted for it      
             return add_course  
-            # print(Grade.courses_completed[CWID_st][grade.add_course])
            
     
 class Instructor:
@@ -157,9 +158,8 @@ class Instructor:
         self.dept = dept
         self.courses_taught = defaultdict(int)
         
-    def in_add_course(self, course, grade):
-        self.courses_taught[grade.course]=grade.course
-        return self.courses_taught
+    def in_add_course(self, course):
+        self.courses_taught[course] += 1
         
     def courses_taught(self, course):
         """Create a defaultdict(int) where key==course, value==num_students"""
